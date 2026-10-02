@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tooth Contact Lab: collisions, registration and staging in the browser</title>
+  <meta name="description" content="A three.js demo for digital orthodontics: interproximal contact and collision maps, ICP registration of a scan to a reference tooth, and collision-aware aligner staging. Runs in the browser; load your own STL." />
+  <meta property="og:title" content="Tooth Contact Lab" />
+  <meta property="og:description" content="Collision maps, scan registration and collision-aware aligner staging on tooth meshes, in the browser." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://luoy16002-svg.github.io/tooth-contact-lab/" />
+  <meta property="og:image" content="https://luoy16002-svg.github.io/tooth-contact-lab/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#eceee9" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e7c86'/%3E%3Ccircle cx='12' cy='16' r='6' fill='%23f8f8f5'/%3E%3Ccircle cx='21' cy='16' r='6' fill='%23f8f8f5' fill-opacity='.75'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <aside class="side">
+    <header>
+      <h1>Tooth Contact Lab</h1>
+      <p class="lede">Collision maps, scan registration and movement staging on tooth meshes, running in your browser with three.js and a BVH.</p>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-mode="contacts" aria-selected="true">Contacts</button>
+      <button role="tab" data-mode="register" aria-selected="false">Registration</button>
+      <button role="tab" data-mode="stages" aria-selected="false">Staging</button>
+    </nav>
+
+    <section class="panel" data-panel="contacts">
+      <p>Move the right tooth against the left one. Every vertex gets its signed distance to the other surface: red is overlap, amber is contact (under 0.1 mm), blue is the near zone.</p>
+      <label class="ctl">Gap along the arch <output id="gapOut"></output><input id="gap" type="range" min="-0.8" max="1.5" step="0.01" value="0.05" /></label>
+      <label class="ctl">Rotation (long axis) <output id="rotOut"></output><input id="rot" type="range" min="-20" max="20" step="0.5" value="0" /></label>
+      <label class="ctl">Tip (mesio-distal) <output id="tipOut"></output><input id="tip" type="range" min="-12" max="12" step="0.5" value="0" /></label>
+      <label class="check"><input id="open" type="checkbox" /> Swing the teeth open to show both contact faces</label>
+      <dl class="stats">
+        <div><dt>Closest approach</dt><dd id="sMin">-</dd></div>
+        <div><dt>Contact area</dt><dd id="sContact">-</dd></div>
+        <div><dt>Overlap area</dt><dd id="sPen">-</dd></div>
+        <div><dt>Query time</dt><dd id="sTime">-</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel" data-panel="register" hidden>
+      <p>A simulated intraoral scan of the left tooth (crown only, with 30 µm noise) starts at a random pose. Two point-to-point ICP steps (Horn's closed form) bring it close, then point-to-plane steps lock it onto the reference surface, usually in under ten iterations.</p>
+      <div class="row"><button id="newScan" class="ghost">New random scan</button><button id="runIcp" class="primary">Register</button></div>
+      <svg id="chart" viewBox="0 0 300 110" role="img" aria-label="RMS error per iteration"></svg>
+      <dl class="stats">
+        <div><dt>RMS distance</dt><dd id="rRms">-</dd></div>
+        <div><dt>Iterations</dt><dd id="rIt">-</dd></div>
+        <div><dt>Rotation error</dt><dd id="rRot">-</dd></div>
+        <div><dt>Translation error</dt><dd id="rTr">-</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel" data-panel="stages" hidden>
+      <p>The right tooth starts 5 mm lingual and rotated 30°. Each aligner stage may move it at most 0.25 mm and 2°, and every stage is checked against the neighbour. The dashed outline is the target.</p>
+      <div class="seg" role="radiogroup" aria-label="Staging method">
+        <button role="radio" data-plan="straight" aria-checked="true">Straight line</button>
+        <button role="radio" data-plan="aware" aria-checked="false">Collision-aware</button>
+      </div>
+      <p id="planNote" class="note" aria-live="polite"></p>
+      <div class="row"><button id="play" class="primary">Play</button><span id="stageLabel" class="muted"></span></div>
+      <label class="ctl">Stage<input id="stage" type="range" min="0" max="10" step="1" value="0" /></label>
+      <ol id="stageList" class="stage-list"></ol>
+    </section>
+
+    <section class="load">
+      <h2>Use your own meshes</h2>
+      <p>STL files in millimetres, closed surfaces. Nothing is uploaded.</p>
+      <label class="file">Left tooth (A)<input id="fileA" type="file" accept=".stl" /></label>
+      <label class="file">Right tooth (B)<input id="fileB" type="file" accept=".stl" /></label>
+    </section>
+    <footer class="foot">Built by Kai, independent developer. <a href="https://luoy16002-svg.github.io/kai-works/">Portfolio</a> · <a href="https://github.com/luoy16002-svg/tooth-contact-lab">Source</a></footer>
+  </aside>
+  <main id="view" aria-label="3D view"></main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

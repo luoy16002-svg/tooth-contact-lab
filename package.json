@@ -1,0 +1,24 @@
+{
+  "name": "tooth-contact-lab",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "three": "^0.180.0",
+    "three-mesh-bvh": "^0.9.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
+  },
+  "description": "Interproximal collision maps, scan registration (ICP) and collision-aware aligner staging on tooth meshes, in the browser with three.js and three-mesh-bvh.",
+  "license": "MIT"
+}
